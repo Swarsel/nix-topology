@@ -300,22 +300,58 @@ let
           <h2 tw="text-2xl font-bold">Services Overview</h2>
         </div>
 
-        ${concatLines (
-          flip map (attrValues config.nodes) (
-            node:
-            let
-              services = filter (x: !x.hidden) (attrValues node.services);
-            in
-            concatLines (
-              flip map services (
+        ${
+          let
+            allServices = lib.concatMap (
+              node:
+              let
+                nodeServices = filter (s: !s.hidden) (attrValues node.services);
+              in
+              map (s: s // { nodeName = node.name; }) nodeServices
+            ) (attrValues config.nodes);
+            groupedServices = builtins.groupBy (s: s.name) allServices;
+            sortedNames = sort (a: b: a < b) (lib.attrNames groupedServices);
+          in
+          concatLines (
+            map (
+              name:
+              let
+                services = groupedServices.${name};
+                count = lib.length services;
+              in
+              if count > 1 then
+                let
+                  sortedServices = sort (a: b: a.nodeName < b.nodeName) services;
+                  mainService = (head services) // {
+                    info = "";
+                  };
+                  rows = map (s: /* html */ ''
+                    <div tw="flex flex-row mt-1">
+                       <span tw="text-sm text-[#7a899f]">${s.nodeName}</span>
+                       <span tw="flex grow"></span>
+                       ${optionalString (
+                         s.info != ""
+                       ) ''<span tw="text-sm text-[#e3e6eb] text-right pl-4">${s.info}</span>''}
+                    </div>
+                  '') sortedServices;
+
+                  additionalInfo = concatLines rows;
+                in
                 html.node.mkService {
-                  additionalInfo = ''<p tw="text-sm text-[#7a899f] m-0">${node.name}</p>'';
+                  inherit additionalInfo;
                   includeDetails = false;
-                }
-              )
-            )
+                } mainService
+              else
+                let
+                  service = head services;
+                in
+                html.node.mkService {
+                  additionalInfo = /* html */ ''<p tw="text-sm text-[#7a899f] m-0">${service.nodeName}</p>'';
+                  includeDetails = false;
+                } service
+            ) sortedNames
           )
-        )}
+        }
 
         ${spacingMt2}
       '';
