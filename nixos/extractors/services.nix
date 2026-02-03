@@ -213,7 +213,7 @@ in
 
       gitea =
         let
-          address = config.services.gitea.settings.server.HTTP_ADDR or null;
+          address = config.services.freshrss.baseUrl or null;
           port = config.services.gitea.settings.server.HTTP_PORT or null;
         in
         mkIf config.services.gitea.enable {
