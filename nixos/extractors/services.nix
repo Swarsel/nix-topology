@@ -251,6 +251,16 @@ in
           details.listen.text = "${HTTP_ADDR}:${toString HTTP_PORT}";
         };
 
+      freshrss =
+        let
+          address = config.services.freshrss.baseUrl or null;
+        in
+        mkIf config.services.freshrss.enable {
+          name = "FreshRSS";
+          icon = "services.freshrss";
+          info = mkIf (address != null) address;
+        };
+
       gitea =
         let
           inherit (config.services.gitea.settings.server) HTTP_ADDR HTTP_PORT ROOT_URL;
