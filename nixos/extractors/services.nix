@@ -191,6 +191,16 @@ in
           details.listen = mkIf (address != null && port != null) { text = "${address}:${toString port}"; };
         };
 
+      freshrss =
+        let
+          address = config.services.freshrss.baseUrl or null;
+        in
+        mkIf config.services.freshrss.enable {
+          name = "FreshRSS";
+          icon = "services.freshrss";
+          info = mkIf (address != null) address;
+        };
+
       gitea =
         let
           address = config.services.gitea.settings.server.HTTP_ADDR or null;
