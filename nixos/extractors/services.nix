@@ -162,6 +162,16 @@ in
         details.listen.text = "${config.services.code-server.host}:${toString config.services.code-server.port}";
       };
 
+      crowdsec =
+        let
+          server = config.services.crowdsec.settings.general.api.server or { };
+        in
+        mkIf config.services.crowdsec.enable {
+          name = "CrowdSec";
+          icon = "services.crowdsec";
+          details.listen.text = mkIf ((server.enable or false) && server ? listen_uri) server.listen_uri;
+        };
+
       deluge =
         let
           daemonPort = config.services.deluge.config.daemon_port or 58846;
