@@ -470,6 +470,14 @@ in
         info = "https://${config.services.mastodon.localDomain}";
       };
 
+      matrix-appservice-irc = mkIf config.services.matrix-appservice-irc.enable {
+        name = "matrix-appservice-irc";
+        icon = "services.matrix-appservice-irc";
+        details.listen.text = "${
+          config.services.matrix-appservice-irc.settings.homeserver.bindHostname or "0.0.0.0"
+        }:${toString config.services.matrix-appservice-irc.port}";
+      };
+
       matrix-synapse =
         let
           address = config.services.matrix-synapse.settings.public_baseurl;
