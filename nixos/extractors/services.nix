@@ -32,6 +32,7 @@ let
     hasPrefix
     filter
     tail
+    toList
     ;
 in
 {
@@ -347,10 +348,21 @@ in
       home-assistant = mkIf config.services.home-assistant.enable {
         name = "Home Assistant";
         icon = "services.home-assistant";
-        details.listen.text = pipe config.services.home-assistant.config.http.server_host [
-          (map (addr: "${addr}:${toString config.services.home-assistant.config.http.server_port}"))
-          toString
-        ];
+        details.listen.text =
+          let
+            http = config.services.home-assistant.config.http or { };
+          in
+          pipe
+            (http.server_host or [
+              "0.0.0.0"
+              "::"
+            ]
+            )
+            [
+              toList
+              (map (addr: "${addr}:${toString (http.server_port or 8123)}"))
+              toString
+            ];
       };
 
       hydra = mkIf config.services.hydra.enable {
